@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foggygram Web — Official Client</title>
+  <link rel="icon" type="image/jpeg" href="../assets/images/foggy_mascot.jpg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background mesh with floating orbs -->
+  <div class="bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- App Container -->
+  <div id="app" class="app-root">
+
+    <!-- 1. SPLASH SCREEN VIEW -->
+    <div id="view-splash" class="view view-center active">
+      <div class="splash-box">
+        <div class="mascot-container" id="splash-mascot">
+          <div class="cloud-canvas">
+            <div class="cloud">
+              <div class="puff p1"></div>
+              <div class="puff p2"></div>
+              <div class="puff p3"></div>
+              <div class="puff p4"></div>
+              <div class="puff p5"></div>
+              <div class="face">
+                <div class="eyes">
+                  <div class="eye"><div class="glint"></div></div>
+                  <div class="eye"><div class="glint"></div></div>
+                </div>
+                <div class="mouth"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <h1 class="splash-title">Foggygram</h1>
+        <p class="splash-subtitle">Messaging in the mist</p>
+        <button class="btn primary small" style="margin-top:24px" onclick="navigateTo('vault')">Open Vault</button>
+      </div>
+    </div>
+
+    <!-- 2. VAULT UNLOCK SCREEN VIEW -->
+    <div id="view-vault" class="view view-center">
+      <div class="sheet auth-sheet">
+        <!-- 3D Mascot Peeker with Hands covering eyes -->
+        <div class="mascot peeker">
+          <div class="cloud-canvas small">
+            <div class="cloud">
+              <div class="puff p1"></div>
+              <div class="puff p2"></div>
+              <div class="puff p3"></div>
+              <div class="puff p4"></div>
+              <div class="puff p5"></div>
+              <div class="face" id="vault-face">
+                <div class="eyes">
+                  <div class="eye"><div class="glint"></div></div>
+                  <div class="eye"><div class="glint"></div></div>
+                </div>
+                <div class="mouth"></div>
+                <div class="hand left"></div>
+                <div class="hand right"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="talk cloud-speech" id="vault-speech">Enter your master PIN to unlock 🔐</div>
+
+        <div class="brand-text">
+          <h2 class="sheet-title">Welcome back</h2>
+          <p class="lead">Unlock your encrypted session vault without OTPs</p>
+        </div>
+
+        <!-- 6-digit PIN input -->
+        <div class="pin-row" id="pin-row">
+          <div class="pin-box active" data-index="0"></div>
+          <div class="pin-box" data-index="1"></div>
+          <div class="pin-box" data-index="2"></div>
+          <div class="pin-box" data-index="3"></div>
+          <div class="pin-box" data-index="4"></div>
+          <div class="pin-box" data-index="5"></div>
+        </div>
+
+        <div class="keypad">
+          <button class="key-btn" onclick="enterPinDigit('1')">1</button>
+          <button class="key-btn" onclick="enterPinDigit('2')">2</button>
+          <button class="key-btn" onclick="enterPinDigit('3')">3</button>
+          <button class="key-btn" onclick="enterPinDigit('4')">4</button>
+          <button class="key-btn" onclick="enterPinDigit('5')">5</button>
+          <button class="key-btn" onclick="enterPinDigit('6')">6</button>
+          <button class="key-btn" onclick="enterPinDigit('7')">7</button>
+          <button class="key-btn" onclick="enterPinDigit('8')">8</button>
+          <button class="key-btn" onclick="enterPinDigit('9')">9</button>
+          <button class="key-btn action-key" onclick="navigateTo('login')">🔑</button>
+          <button class="key-btn" onclick="enterPinDigit('0')">0</button>
+          <button class="key-btn action-key" onclick="deletePinDigit()">⌫</button>
+        </div>
+
+        <div class="auth-footer">
+          <button class="btn ghost small" onclick="bypassDemoUnlock()">Demo Quick Unlock (000000)</button>
+          <p class="foot link" onclick="navigateTo('login')">+ Add New Telegram Account</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. LOGIN SCREEN VIEW -->
+    <div id="view-login" class="view view-center">
+      <div class="sheet login-sheet">
+        <div class="sheet-header">
+          <div class="sheet-title-row">
+            <span class="back-arrow" onclick="navigateTo('vault')">←</span>
+            <h2 class="sheet-title">Connect Telegram</h2>
+          </div>
+          <p class="lead">Once authenticated, your session is encrypted into the Vault — zero repeated OTPs.</p>
+        </div>
+
+        <!-- Tab switcher: Phone vs QR -->
+        <div class="segmented" style="width:100%;margin-bottom:20px">
+          <button class="seg active" id="tab-btn-qr" onclick="switchLoginTab('qr')">QR Code</button>
+          <button class="seg" id="tab-btn-phone" onclick="switchLoginTab('phone')">Phone Number</button>
+        </div>
+
+        <!-- QR Tab -->
+        <div id="login-qr-section" class="login-tab-content">
+          <div class="qr-card">
+            <div id="qr-code-placeholder" class="qr-canvas-box">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=tg%3A%2F%2Flogin%3Ftoken%3Dfoggygram_auth_session_demo" alt="Telegram QR" class="qr-image">
+            </div>
+            <p class="qr-instruction">Scan with your phone camera or inside Telegram:<br><b>Settings → Devices → Link Desktop Device</b></p>
+          </div>
+          <button class="btn primary" onclick="simulateLoginSuccess('QR User (+1 555 901 2234)')">Simulate QR Scan Success</button>
+        </div>
+
+        <!-- Phone Tab -->
+        <div id="login-phone-section" class="login-tab-content hidden">
+          <div class="field">
+            <label>Phone number</label>
+            <input type="tel" id="login-phone-input" placeholder="+1 (555) 000-0000" value="+1 ">
+          </div>
+          <button class="btn primary" onclick="requestPhoneCode()">Send Code via Telegram</button>
+          
+          <div id="login-otp-step" class="hidden" style="margin-top:16px">
+            <div class="field">
+              <label>Telegram login code</label>
+              <input type="text" id="login-code-input" placeholder="Enter 5-digit code">
+            </div>
+            <button class="btn primary" onclick="simulateLoginSuccess('Mobile User')">Confirm & Save to Vault</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. MAIN TELEGRAM WEB APPLICATION VIEW (3-Pane macOS layout) -->
+    <div id="view-chat" class="view view-full">
+      
+      <!-- Pane 0: Mini Account Rail (Unlimited Accounts) -->
+      <nav class="account-rail">
+        <div class="rail-brand" title="Foggygram">
+          <div class="cloud-mini-icon">☁️</div>
+        </div>
+
+        <div class="account-avatars-list" id="rail-accounts-list">
+          <!-- Populated by JS -->
+        </div>
+
+        <button class="rail-btn add-btn" title="Add Account without OTP loss" onclick="navigateTo('login')">+</button>
+        <button class="rail-btn settings-btn" title="Foggy Vault & Privacy Settings" onclick="toggleSettingsModal()">⚙️</button>
+      </nav>
+
+      <!-- Pane 1: Chat List & Filters Pane -->
+      <aside class="chat-list-pane">
+        <div class="pane-header">
+          <div class="search-bar-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="chat-search-input" placeholder="Search chats or commands..." oninput="filterChatList(this.value)">
+          </div>
+
+          <!-- Folder filter tabs -->
+          <div class="folder-tabs-row" id="folder-tabs">
+            <button class="folder-chip active" onclick="filterFolder(this, 'all')">All</button>
+            <button class="folder-chip" onclick="filterFolder(this, 'private')">Private</button>
+            <button class="folder-chip" onclick="filterFolder(this, 'groups')">Groups</button>
+            <button class="folder-chip" onclick="filterFolder(this, 'channels')">Channels</button>
+            <button class="folder-chip" onclick="filterFolder(this, 'bots')">Bots</button>
+          </div>
+        </div>
+
+        <!-- Scrollable Chat List -->
+        <div class="chat-items-scroll" id="chat-list-container">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+
+      <!-- Pane 2: Conversation View Pane -->
+      <main class="chat-main-pane">
+        <!-- Chat Top Bar -->
+        <header class="chat-topbar" id="chat-topbar">
+          <div class="topbar-user" onclick="toggleInfoPane()">
+            <div class="avatar" id="topbar-avatar">A</div>
+            <div class="topbar-meta">
+              <h3 class="topbar-name" id="topbar-name">Alex Chen</h3>
+              <p class="topbar-status" id="topbar-status"><span class="dot on"></span> Online</p>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <span class="chip ghost-indicator-chip" id="topbar-ghost-chip" onclick="toggleGhostProtocol()">👻 GHOST ON</span>
+            <button class="topbar-btn" title="✨ Summon Foggy AI Assistant" onclick="toggleAiDrawer()">✨</button>
+            <button class="topbar-btn" title="Search in chat">🔍</button>
+            <button class="topbar-btn" title="Chat info" onclick="toggleInfoPane()">ℹ️</button>
+          </div>
+        </header>
+
+        <!-- Message Thread -->
+        <div class="messages-container" id="messages-container">
+          <!-- Messages populated by JS -->
+        </div>
+
+        <!-- Floating Foggy AI Assistant Drawer -->
+        <div class="ai-drawer hidden" id="ai-drawer">
+          <div class="ai-drawer-header">
+            <div class="ai-title-row">
+              <span class="ai-cloud-icon">☁️</span>
+              <span class="ai-title">Foggy AI Assistant</span>
+              <span class="chip">AGENTIC</span>
+            </div>
+            <button class="close-btn" onclick="toggleAiDrawer()">✕</button>
+          </div>
+
+          <div class="ai-quick-chips">
+            <button class="ai-chip" onclick="runAiCommand('summarize')">📊 Summarize Chat</button>
+            <button class="ai-chip" onclick="runAiCommand('reply')">✍️ Draft Smart Reply</button>
+            <button class="ai-chip" onclick="runAiCommand('ghost')">👻 Toggle Ghost Mode</button>
+            <button class="ai-chip" onclick="runAiCommand('vault')">🔐 Backup Session Vault</button>
+            <button class="ai-chip" onclick="runAiCommand('recover')">🔍 View Deleted Messages</button>
+          </div>
+
+          <div class="ai-input-row">
+            <input type="text" id="ai-prompt-input" placeholder="Ask Foggy to write, summarize, or configure settings..." onkeydown="if(event.key==='Enter') executeCustomAiPrompt()">
+            <button class="btn primary small" onclick="executeCustomAiPrompt()">Run</button>
+          </div>
+
+          <div class="ai-response-box" id="ai-response-box">
+            Ready! Click any quick action or ask Foggy to write a response.
+          </div>
+        </div>
+
+        <!-- Bottom Message Composer -->
+        <footer class="composer-bar">
+          <button class="composer-btn" title="Attach file or photo">📎</button>
+          <button class="composer-btn" title="Emoji">😊</button>
+          
+          <div class="input-expand-wrap">
+            <textarea id="message-input" placeholder="Write a message..." rows="1" oninput="autoResizeTextarea(this)" onkeydown="handleMessageKey(event)"></textarea>
+          </div>
+
+          <button class="composer-btn ai-trigger-btn" title="AI Suggestion" onclick="toggleAiDrawer()">✨</button>
+          <button class="composer-btn send-btn" id="send-button" onclick="sendMessage()">➤</button>
+        </footer>
+      </main>
+
+      <!-- Pane 3: Contact / Group Info Panel (Collapsible) -->
+      <aside class="chat-info-pane hidden" id="chat-info-pane">
+        <div class="info-header">
+          <h3>User Info</h3>
+          <button class="close-btn" onclick="toggleInfoPane()">✕</button>
+        </div>
+
+        <div class="info-profile">
+          <div class="avatar big-avatar" id="info-avatar">A</div>
+          <h2 class="info-name" id="info-name">Alex Chen</h2>
+          <p class="info-handle" id="info-handle">@alexchen</p>
+        </div>
+
+        <!-- Privacy & Ghost Toggle for this Chat -->
+        <div class="info-section card-glass">
+          <div class="toggle-row">
+            <div class="toggle-text">
+              <span class="toggle-title">Ghost Protocol</span>
+              <span class="toggle-sub">Read messages without sending read receipts</span>
+            </div>
+            <div class="toggle-track on" id="info-ghost-toggle" onclick="toggleChatGhost()">
+              <div class="toggle-thumb"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact details -->
+        <div class="info-section card-glass">
+          <div class="info-detail-item">
+            <span class="detail-label">Phone</span>
+            <span class="detail-value" id="info-phone">+1 (555) 019-2834</span>
+          </div>
+          <div class="info-detail-item">
+            <span class="detail-label">Bio</span>
+            <span class="detail-value" id="info-bio">Building monochrome glassmorphism apps 🌫️</span>
+          </div>
+        </div>
+
+        <!-- Shared Media Grid -->
+        <div class="info-section card-glass">
+          <h4 class="section-heading">Shared Media</h4>
+          <div class="media-grid">
+            <div class="media-thumb"></div>
+            <div class="media-thumb"></div>
+            <div class="media-thumb"></div>
+            <div class="media-thumb"></div>
+            <div class="media-thumb"></div>
+            <div class="media-thumb"></div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- 5. SETTINGS & VAULT EXPORT MODAL -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="sheet modal-sheet">
+        <div class="sheet-header">
+          <div class="sheet-title-row">
+            <h2 class="sheet-title">Foggygram Settings & Vault</h2>
+            <button class="close-btn" onclick="toggleSettingsModal()">✕</button>
+          </div>
+          <p class="lead">Unlimited Accounts & AES-256 Multi-Session Vault</p>
+        </div>
+
+        <div class="settings-content">
+          <div class="settings-item card-glass">
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <span class="toggle-title">Global Ghost Mode</span>
+                <span class="toggle-sub">Suppress read receipts, hide typing, incognito stories</span>
+              </div>
+              <div class="toggle-track on" id="global-ghost-toggle" onclick="toggleGlobalGhost()">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-item card-glass">
+            <div class="toggle-row">
+              <div class="toggle-text">
+                <span class="toggle-title">Deleted Message Preservation</span>
+                <span class="toggle-sub">Keep local cached copies of deleted/edited messages</span>
+              </div>
+              <div class="toggle-track on">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-item card-glass">
+            <h4 class="section-heading">Export Session Vault</h4>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Backup your active account keys to prevent ever needing SMS or OTP again.</p>
+            <button class="btn primary small" onclick="exportVaultPayload()">Download .foggyvault Backup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
